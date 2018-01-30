@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # gym-mupen64plus
 
 This project is an [OpenAI Gym](https://github.com/openai/gym/) environment wrapper for the [Mupen64Plus](http://www.mupen64plus.org/) N64 emulator. The goal of this project is to provide a platform for reinforcement learning agents to be able to easily interface with N64 games using the OpenAI gym library. This should allow for easier adaptation of existing agents that have been built using the gym library to play Atari games, for example.
@@ -213,3 +214,6 @@ register(
     nondeterministic=True,
 )
 ```
+=======
+# DLProject
+>>>>>>> 45f5d4d841c0e7ba1e53d517e2e5040b6c9c0645

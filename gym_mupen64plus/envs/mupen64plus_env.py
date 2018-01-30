@@ -205,7 +205,7 @@ class Mupen64PlusEnv(gym.Env):
 
         xvfb_proc = None
         if config['USE_XVFB']:
-            display_num = -1
+            display_num = 0
             success = False
             # If we couldn't find an open display number after 15 attempts, give up
             while not success and display_num <= 15:

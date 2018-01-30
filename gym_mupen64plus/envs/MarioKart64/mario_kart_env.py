@@ -32,7 +32,12 @@ class MarioKartEnv(Mupen64PlusEnv):
     MAP_SERIES = 0
     MAP_CHOICE = 0
 
-    ENABLE_CHECKPOINTS = False
+    ENABLE_CHECKPOINTS = True
+    USE_CHECKPOINTS_TO_END_EPISODE = True
+    END_EPISODE_CHECKPOINT_THRESHOLD = 1
+    
+    USE_LAPS_TO_END_EPISODE = False
+    END_EPISODE_LAP_THRESHOLD = 1
 
     def __init__(self, character='mario'):
         super(MarioKartEnv, self).__init__(mk_config['ROM_NAME'])
@@ -44,12 +49,13 @@ class MarioKartEnv(Mupen64PlusEnv):
         self.lap = 1
 
         if self.ENABLE_CHECKPOINTS:
-            self._checkpoint_tracker = [[False for i in range(len(self.CHECKPOINTS))] for j in range(3)]
-        
+            self._checkpoint_tracker = [[False for i in range(len(self.CHECKPOINTS))] for j in range(3)]    
+
+        self.chkpt_count = 1
         # Nothing to do on the first call to reset()
         if self.reset_count > 0:
 
-            if self.episode_over:
+            if self.episode_over and not (self.USE_CHECKPOINTS_TO_END_EPISODE or self.USE_LAPS_TO_END_EPISODE):
                 self._wait(count=59)
                 self._navigate_post_race_menu()
                 self._wait(count=40, wait_for='map select screen')
@@ -91,7 +97,8 @@ class MarioKartEnv(Mupen64PlusEnv):
                     #cprint('CHECKPOINT hit but not achieved (not all prior points were hit)!', 'red')
                     return self.DEFAULT_STEP_REWARD
 
-                cprint('CHECKPOINT achieved!', 'red')
+                cprint('CHECKPOINT %s achieved!' % self.chkpt_count, 'red')
+                self.chkpt_count += 1
                 self._checkpoint_tracker[self.lap - 1][cur_ckpt] = True
                 return self.CHECKPOINT_REWARD
             else:
@@ -139,7 +146,7 @@ class MarioKartEnv(Mupen64PlusEnv):
         bottom_left = IMAGE_HELPER.GetPixelColor(pix_arr, 19, 460)
         bottom_right = IMAGE_HELPER.GetPixelColor(pix_arr, 620, 460)
 
-        if upper_left == upper_right == bottom_left == bottom_right:
+        if upper_left == upper_right == bottom_left == bottom_right or (self.USE_CHECKPOINTS_TO_END_EPISODE and self.chkpt_count > self.END_EPISODE_CHECKPOINT_THRESHOLD) or (self.USE_LAPS_TO_END_EPISODE and self._get_lap() > self.END_EPISODE_LAP_THRESHOLD):
             self.end_episode_confidence += 1
         else:
             self.end_episode_confidence = 0
